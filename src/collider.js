@@ -1,5 +1,8 @@
 var makeGame = function() {
   var game = {};
+  var player = {};
+
+
 
   game.gameOptions = {
     height: 450,
@@ -7,6 +10,11 @@ var makeGame = function() {
     numberOfEnemies: 30,
     padding: 20
   };
+
+  player.shape = [{
+    x: game.gameOptions.width * 0.5,
+    y: game.gameOptions.height * 0.5
+  }];
 
   game.stats = {
     score: 0,
@@ -34,6 +42,20 @@ var makeGame = function() {
     return enemiesArray;
   };
 
+  player.render = function(playerData){
+    var player;
+    player = game.board.selectAll('circle.player').data(playerData);
+    player.enter().append('svg:circle').attr('class', 'player')
+      .attr('cx', function(player){
+        return player.x;
+      })
+      .attr('cy', function(player){
+        return player.y;
+      })
+      .attr('r', 10)
+      .attr('fill', 'red');
+  };
+
   game.render = function(enemyData){
     console.log('hello');
     var enemies;
@@ -49,7 +71,7 @@ var makeGame = function() {
       })
       .attr('r', 0);
     enemies.exit().remove();
-    enemies.transition().duration(500).attr('r', 10)
+    enemies.transition().duration(500).attr('r', 10).transition().duration(1000)
       .attr('cx', function(enemy){
         return game.axes.x(enemy.x);
       })
@@ -63,6 +85,8 @@ var makeGame = function() {
     moveEnemies = function() {
       var newEnemyPositions;
       newEnemyPositions = game.createEnemies();
+      //debugger;
+      player.render(player.shape);
       return game.render(newEnemyPositions);
     };
     moveEnemies();
