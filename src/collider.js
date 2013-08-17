@@ -40,14 +40,15 @@ var render = function(enemyData){
     return d.id;
   });
   enemies.enter().append('svg:circle').attr('class', 'enemy')
-  .attr('cx', function(enemy){
-    return axes.x(enemy.x);
-  })
-  .attr('cy', function(enemy){
-    return axes.y(enemy.y);
-  })
-  .attr('r', 10);
+    .attr('cx', function(enemy){
+      return axes.x(enemy.x);
+    })
+    .attr('cy', function(enemy){
+      return axes.y(enemy.y);
+    })
+    .attr('r', 0);
   enemies.exit().remove();
+  //enemies.transition().duration(500).attr('r', 10).transition().duration(1000).tween('custom', createEnemies);
 };
 
 var newEnemies = createEnemies();
