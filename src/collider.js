@@ -28,6 +28,15 @@ var makeGame = function() {
   .attr('width', game.gameOptions.width)
   .attr('height', game.gameOptions.height);
 
+  game.updateScore = function() {
+    return d3.select('#current-score').text(gameStats.score.toString());
+  };
+
+  game.updateBestScore = function() {
+    gameStats.bestScore = _.max([gameStats.bestScore, gameStats.score]);
+    return d3.select('#best-score').text(gameStats.bestScore.toString());
+  };
+
 
   game.createEnemies = function(){
     var enemiesArray = [];
@@ -116,7 +125,7 @@ var makeGame = function() {
   };
 
   game.render = function(enemyData){
-    var enemies;
+    var enemies, checkCollision, onCollision, tweenWithCollisionDetection;
     enemies = game.board.selectAll('circle.enemy').data(enemyData, function(d) {
       return d.id;
     });
