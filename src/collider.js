@@ -2,8 +2,6 @@ var makeGame = function() {
   var game = {};
   var player = {};
 
-
-
   game.gameOptions = {
     height: 450,
     width: 700,
@@ -43,21 +41,32 @@ var makeGame = function() {
   };
 
   player.render = function(playerData){
-    var player;
-    player = game.board.selectAll('circle.player').data(playerData);
-    player.enter().append('svg:circle').attr('class', 'player')
-      .attr('cx', function(player){
-        return player.x;
+    var hero;
+    hero = game.board.selectAll('circle.player').data(playerData);
+
+    var dragMove = function(){
+      var newX = parseInt(d3.event.dx, 10) + parseInt(d3.select(this).attr('cx'),10);
+      var newY = parseInt(d3.event.dy, 10) + parseInt(d3.select(this).attr('cy'),10);
+
+      return  hero.attr('cx', function(){ return newX; })
+                  .attr('cy', function(){ return newY; })
+                  .transition();
+    };
+    var dragBehavior = d3.behavior.drag().on('drag', dragMove);
+    hero.call(dragBehavior);
+
+    hero.enter().append('svg:circle').attr('class', 'player')
+      .attr('cx', function(hero){
+        return hero.x;
       })
-      .attr('cy', function(player){
-        return player.y;
+      .attr('cy', function(hero){
+        return hero.y;
       })
       .attr('r', 10)
       .attr('fill', 'red');
   };
 
   game.render = function(enemyData){
-    console.log('hello');
     var enemies;
     enemies = game.board.selectAll('circle.enemy').data(enemyData, function(d) {
       return d.id;
@@ -85,7 +94,6 @@ var makeGame = function() {
     moveEnemies = function() {
       var newEnemyPositions;
       newEnemyPositions = game.createEnemies();
-      //debugger;
       player.render(player.shape);
       return game.render(newEnemyPositions);
     };
