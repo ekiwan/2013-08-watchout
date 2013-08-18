@@ -10,8 +10,8 @@ var makeGame = function() {
   };
 
   player.shape = [{
-    x: game.gameOptions.width * 0.5,
-    y: game.gameOptions.height * 0.5
+    x: 0,
+    y: 0
   }];
 
   game.stats = {
@@ -28,6 +28,7 @@ var makeGame = function() {
   .attr('width', game.gameOptions.width)
   .attr('height', game.gameOptions.height);
 
+
   game.createEnemies = function(){
     var enemiesArray = [];
     for(var i = 0; i < game.gameOptions.numberOfEnemies; i++){
@@ -40,30 +41,78 @@ var makeGame = function() {
     return enemiesArray;
   };
 
+  player.getX = function () {
+    return this.x;
+  };
+
+  player.setX = function (x) {
+    var maxX, minX;
+    minX = game.gameOptions.padding;
+    maxX = game.gameOptions.width - game.gameOptions.padding;
+    if (x <= minX) x = minX;
+    if (x >= maxX) x = maxX;
+    player.x = x;
+    return player.x;
+  };
+
+  player.getY = function () {
+    return player.y;
+  };
+
+  player.setY = function (y) {
+    var maxY, minY;
+    minY = game.gameOptions.padding;
+    maxY = game.gameOptions.height - game.gameOptions.padding;
+    if (y <= minY) y = minY;
+    if (y >= maxY) y = maxY;
+    player.y = y;
+    return player.y;
+  };
+
+  player.transform = function(opts) {
+    var hero = game.board.selectAll('circle.player');
+    player.setX(opts.x || hero.x);
+    player.setY(opts.y || hero.y);
+    return hero.attr('transform', ("translate(" + (player.getX()) + "," + (player.getY()) + ")"));
+    };
+
+  player.moveAbsolute = function (x, y) {
+    return player.transform({
+      x: x,
+      y: y
+    });
+  };
+
+  player.moveRelative = function(dx, dy) {
+    return player.transform({
+      x: player.getX() + dx,
+      y: player.getY() + dy
+    });
+  };
+
+  player.setupDragging = function() {
+    var dragBehavior, dragMove,
+      hero = game.board.selectAll('circle.player');
+    dragMove = function() {
+      return player.moveRelative(d3.event.dx, d3.event.dy);
+    };
+    dragBehavior = d3.behavior.drag().on('drag', dragMove);
+    return hero.call(dragBehavior);
+  };
+
+
+
   player.render = function(playerData){
     var hero;
     hero = game.board.selectAll('circle.player').data(playerData);
-
-    var dragMove = function(){
-      var newX = parseInt(d3.event.dx, 10) + parseInt(d3.select(this).attr('cx'),10);
-      var newY = parseInt(d3.event.dy, 10) + parseInt(d3.select(this).attr('cy'),10);
-
-      return  hero.attr('cx', function(){ return newX; })
-                  .attr('cy', function(){ return newY; })
-                  .transition();
-    };
-    var dragBehavior = d3.behavior.drag().on('drag', dragMove);
-    hero.call(dragBehavior);
-
     hero.enter().append('svg:circle').attr('class', 'player')
-      .attr('cx', function(hero){
-        return hero.x;
-      })
-      .attr('cy', function(hero){
-        return hero.y;
-      })
       .attr('r', 10)
       .attr('fill', 'red');
+    player.transform({
+      x: game.gameOptions.width * 0.5,
+      y: game.gameOptions.height * 0.5
+    });
+    player.setupDragging();
   };
 
   game.render = function(enemyData){
@@ -91,10 +140,10 @@ var makeGame = function() {
 
   game.play = function() {
     var moveEnemies;
+    player.render(player.shape);
     moveEnemies = function() {
       var newEnemyPositions;
       newEnemyPositions = game.createEnemies();
-      player.render(player.shape);
       return game.render(newEnemyPositions);
     };
     moveEnemies();
